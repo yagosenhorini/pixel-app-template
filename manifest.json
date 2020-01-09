@@ -1,9 +1,9 @@
 {
-  "name": "YOUR APP NAME",
-  "vendor": "vtex",
+  "name": "einstein-core",
+  "vendor": "enext",
   "version": "0.0.1",
-  "title": "CHANGEME",
-  "description": "CHANGEME",
+  "title": "Einstein Core Events",
+  "description": "Events dispatch for Einstein Salesforce",
   "billingOptions": {
     "termsURL": "",
     "support": {
@@ -21,7 +21,7 @@
     "vtex.pixel-interfaces": "1.x"
   },
   "settingsSchema": {
-    "title": "YOUR APP NAME",
+    "title": "Einstein Core Events",
     "type": "object",
     "properties": {
       "gtmId": {

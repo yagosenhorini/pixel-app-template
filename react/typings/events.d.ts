@@ -1,15 +1,15 @@
 export interface PixelMessage extends MessageEvent {
   data:
-    | ProductViewData
-    | ProductClickData
-    | OrderPlacedData
-    | PageViewData
-    | ProductImpressionData
-    | AddToCartData
-    | RemoveToCartData
-    | HomePageInfo
-    | ProductPageInfoData
-    | SearchPageInfoData
+  | ProductViewData
+  | ProductClickData
+  | OrderPlacedData
+  | PageViewData
+  | ProductImpressionData
+  | AddToCartData
+  | RemoveToCartData
+  | HomePageInfo
+  | ProductPageInfoData
+  | SearchPageInfoData
 }
 
 export interface EventData {
@@ -36,10 +36,10 @@ export interface ProductPageInfoData extends PageInfoData {
 
 export interface SearchPageInfoData extends PageInfoData {
   eventType:
-    | 'internalSiteSearchView'
-    | 'categoryView'
-    | 'departmentView'
-    | 'emptySearchView'
+  | 'internalSiteSearchView'
+  | 'categoryView'
+  | 'departmentView'
+  | 'emptySearchView'
   category?: CategoryMetaData
   department?: DepartmentMetaData
   search?: SearchMetaData
