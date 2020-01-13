@@ -2,12 +2,10 @@
 import { canUseDOM } from 'vtex.render-runtime'
 import { PixelMessage } from './typings/events'
 
-document.addEventListener('DOMContentLoaded', function(){
-  console.log('bolo de mel');
-})
-
 export function handleEvents(e: PixelMessage) {
-  console.log('e', e);
+  if(e.data.eventName){
+    console.log('Teste', e);
+  }
   switch (e.data.eventName) {
     case 'vtex:pageView': {
 
