@@ -1,4 +1,8 @@
 interface Window extends Window {
   dataLayer: any[]
-  _etmc: any[]
+  _etmc: _etmc
+}
+
+interface _etmc {
+  push: function
 }

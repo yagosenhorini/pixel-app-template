@@ -8,25 +8,23 @@
 /*tslint-disable*/
 import { canUseDOM } from 'vtex.render-runtime'
 import { PixelMessage } from './typings/events'
-import push from './modules/pushEinstein';
+// import window._etmc.push from './modules/window._etmc.pushEinstein';
 
 export function handleEvents(e: PixelMessage) {
   switch (e.data.eventName) {
     case 'vtex:pageInfo': {
-
       switch (e.data.eventType) {
-
         case 'categoryView':
-          console.log(push(["setOrgId", "100023394"]),
-         push(["trackPageView", { "category": e.data.category?.name }]));
-
-         push(["setOrgId", "100023394"]);
-         push(["trackPageView", { "category": e.data.category?.name }]);
+          window._etmc.push(["setOrgId", "100023394"]);
+          window._etmc.push(["trackPageView", { "category": e.data.category?.name }]);
+          console.log('Setado OrgId');
           break;
 
         case 'internalSiteSearchView': {
-         push(["setOrgId", "100023394"]);
-         push(["trackPageView", { "search": e.data.search?.term }]);
+          window._etmc.push(["setOrgId", "100023394"]);
+          window._etmc.push(["trackPageView", { "search": e.data.search?.term }]);
+          console.log('Setado OrgId');
+          break;
         }
         default: {
           return;
@@ -36,36 +34,26 @@ export function handleEvents(e: PixelMessage) {
     }
 
     case 'vtex:productView': {
-     push(["setOrgId", "100023394"]);
-     push(["trackPageView", { "item": e.data.product.productId }]);
+      window._etmc.push(["setOrgId", "100023394"]);
+      window._etmc.push(["trackPageView", { "item": e.data.product.productId }]);
       break;
     }
 
     case 'vtex:addToCart':
-      console.log('oi',push(["trackCart", {
+      window._etmc.push(["setOrgId", "100023394"]);
+      window._etmc.push(["trackCart", {
         "cart": [
           {
-            "item": e.data.items,
-            "quantity": "INSERT_QUANTITY",
-            "price": "INSERT_PRICE",
-            "unique_id": "INSERT_UNIQUE_ID"
-          },
-        ]
-      }]));
-     push(["setOrgId", "100023394"]);
-     push(["trackCart", {
-        "cart": [
-          {
-            "item": e.data.items,
-            "quantity": "INSERT_QUANTITY",
-            "price": "INSERT_PRICE",
-            "unique_id": "INSERT_UNIQUE_ID"
+            "item": e.data.items[0].skuId,
+            "quantity": e.data.items[0].quantity,
+            "price": e.data.items[0].price,
+            "unique_id": e.data.items[0].skuId
           },
         ]
       }]);
+      console.log('Setado OrgId');
       break;
     default: {
-      console.log('saindo do switch')
       return
     }
   }
