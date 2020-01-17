@@ -7,6 +7,7 @@ export interface PixelMessage extends MessageEvent {
   | ProductImpressionData
   | AddToCartData
   | RemoveToCartData
+  | CartChangedData
   | HomePageInfo
   | ProductPageInfoData
   | SearchPageInfoData
@@ -84,6 +85,13 @@ export interface RemoveToCartData extends EventData {
 export interface OrderPlacedData extends Order, EventData {
   event: 'orderPlaced'
   eventName: 'vtex:orderPlaced'
+}
+
+export interface CartChangedData extends EventData {
+  event: 'cartChanged'
+  eventName: 'vtex:cartChanged'
+  items: CartItem[]
+  id: string
 }
 
 export interface ProductViewData extends EventData {
