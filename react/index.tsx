@@ -1,14 +1,8 @@
-// declare global {
-//   interface Window {
-//     window._etmc:any[]
-//   }
-// }
-// let window._etmc = window.window._etmc
+
 /*eslint-disable*/
 /*tslint-disable*/
 import { canUseDOM } from 'vtex.render-runtime'
 import { PixelMessage } from './typings/events'
-// import window._etmc.push from './modules/window._etmc.pushEinstein';
 
 export function handleEvents(e: PixelMessage) {
   switch (e.data.eventName) {
@@ -34,25 +28,51 @@ export function handleEvents(e: PixelMessage) {
     }
 
     case 'vtex:productView': {
+      const { product } = e.data
       window._etmc.push(["setOrgId", "100023394"]);
-      window._etmc.push(["trackPageView", { "item": e.data.product.productId }]);
-      break;
+      window._etmc.push(["trackPageView", { item: product.productId }]);
+      console.log('Salesforce Einstein - Visualizado Produto ID: ' + product.selectedSku + ' Nome: ' + product.productName);
+      break
     }
 
     case 'vtex:addToCart':
+      const { items } = e.data;
+      const productsAdded = items.map((item) => {
+        return {
+          "item": item.skuId,
+          "quantity": item.quantity,
+          "price": item.price / 100,
+          "unique_id": item.skuId
+        }
+      })
       window._etmc.push(["setOrgId", "100023394"]);
-      window._etmc.push(["trackCart", {
-        "cart": [
-          {
-            "item": e.data.items[0].skuId,
-            "quantity": e.data.items[0].quantity,
-            "price": e.data.items[0].price,
-            "unique_id": e.data.items[0].skuId
-          },
-        ]
-      }]);
-      console.log('Setado OrgId');
+      window._etmc.push(["trackCart", { "cart": productsAdded }]);
       break;
+
+    case 'vtex:removeFromCart':
+      if (e.data.items.length <= 0) {
+        window._etmc.push(["setOrgId", "100023394"]);
+        window._etmc.push(["trackCart", { "clear_cart": true }]);
+        console.log('Salesforce Einstein - Carrinho Vazio');
+      }
+      break;
+
+    case 'vtex:orderPlaced':
+      const { transactionProducts } = e.data;
+      const products = transactionProducts.map((item) => {
+        return [
+          {
+            "item": item.sku,
+            "quantity": item.quantity,
+            "price": item.price,
+            "unique_id": item.id
+          },
+        ];
+      });
+      window._etmc.push(["setOrgId", "100023394"]);
+      window._etmc.push(["trackConversion", { "cart": products }]);
+      break;
+
     default: {
       return
     }
