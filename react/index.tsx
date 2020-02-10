@@ -31,14 +31,14 @@ export function handleEvents(e: PixelMessage) {
       const { product } = e.data
       window._etmc.push(["setOrgId", "100023394"]);
       window._etmc.push(["trackPageView", { item: product.productId }]);
-      console.log('Salesforce Einstein - Visualizado Produto ID: ' + product.selectedSku + ' Nome: ' + product.productName);
+      console.log('Salesforce Einstein - Visualizado Produto ID: ' + product.selectedSku.itemId + ' Nome: ' + product.productName);
       break;
     }
 
     case 'vtex:addToCart':
-      window.sc = window.dataLayer.filter(el => {
-        return (el.dimension12);
-      })
+      // window.sc = window.dataLayer.filter(el => {
+      //   return (el.dimension12);
+      // })
       const { items } = e.data;
       const productsAdded = items.map((item) => {
         return {
@@ -51,7 +51,7 @@ export function handleEvents(e: PixelMessage) {
       window._etmc.push(["setOrgId", "100023394"]);
       window._etmc.push(["trackCart", { "cart": productsAdded }]);
       console.log('Setado', productsAdded);
-      fetch(`https://landfy.smartcampaign.com.br/landfy/api/f90e48f7-4845-11ea-979f-0e55972e184b?fields[Visit_ID]=${Date.now() + Math.random().toFixed()}&fields[Email]=${window.email}&fields[Product_Sku]=${items[0].skuId}&fields[Preco]=${items[0].price / 100}&fields[SalesChannel]=${window.sc[0].dimension12}`).then(res => res.json()).then(console.log);
+      fetch(`https://landfy.smartcampaign.com.br/landfy/api/f90e48f7-4845-11ea-979f-0e55972e184b?fields[Visit_ID]=${Date.now() + Math.random().toFixed()}&fields[Email]=${window.email}&fields[Product_Sku]=${items[0].skuId}&fields[Preco]=${items[0].price / 100}&fields[SalesChannel]=${'oi'}`).then(res => res.json()).then(console.log);
       break;
 
     case 'vtex:userData':
@@ -73,9 +73,9 @@ export function handleEvents(e: PixelMessage) {
       break;
 
     case 'vtex:cartChanged':
-      window.sc = window.dataLayer.filter(el => {
-        return (el.dimension12);
-      })
+      // window.sc = window.dataLayer.filter(el => {
+      //   return (el.dimension12);
+      // })
       var pixel = window.pixelManagerEvents;
       var cartId = pixel.filter((el: any) => {
         return el.event === "cartId"
@@ -99,7 +99,7 @@ export function handleEvents(e: PixelMessage) {
               else return string.split(':').slice(0, 2).join('');
             }).join('');
             console.log(date);
-            var params = `fields[cart_id]=${cartId[0].cartId + date + '0'}&fields[Email]=${window.email}&fields[ordered]=0${items}&unique=cart_id&fields[SalesChannel]=${window.sc[0].dimension12}`
+            var params = `fields[cart_id]=${cartId[0].cartId + date + '0'}&fields[Email]=${window.email}&fields[ordered]=0${items}&unique=cart_id&fields[SalesChannel]=${'oi'}`
             fetch(`${url}?${params}`)
               .then((resp) => resp.json())
               .then(function (status) {
@@ -121,9 +121,9 @@ export function handleEvents(e: PixelMessage) {
       break;
 
     case 'vtex:orderPlaced':
-      window.sc = window.dataLayer.filter(el => {
-        return (el.dimension12);
-      })
+      // window.sc = window.dataLayer.filter(el => {
+      //   return (el.dimension12);
+      // })
       var pixel = window.pixelManagerEvents;
       var cartId = pixel.filter((el: any) => {
         return el.event === "cartId"
@@ -146,7 +146,7 @@ export function handleEvents(e: PixelMessage) {
         return `${items}&fields[product${index + 1}]=${item.id}&fields[preco${index + 1}=${item.price}]`
       }, '');
       const url = '//landfy.smartcampaign.com.br/landfy/api/5c694cf4-1ac3-11ea-8061-0ebf47f38cdc';
-      var params = `fields[cart_id]=${cartId[0].cartId + '1'}&fields[Email]=${window.email}.com&fields[ordered]=1${itemsCarrinho}&unique=cart_id&fields[SalesChannel]=${window.sc[0].dimension12}`;
+      var params = `fields[cart_id]=${cartId[0].cartId + '1'}&fields[Email]=${window.email}.com&fields[ordered]=1${itemsCarrinho}&unique=cart_id&fields[SalesChannel]=${'oi'}`;
       fetch(`${url}?${params}`)
         .then(resp => resp.json())
         .then(resp => {
