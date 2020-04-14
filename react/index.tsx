@@ -5,10 +5,14 @@ import { canUseDOM } from 'vtex.render-runtime'
 import { PixelMessage } from './typings/events'
 
 export function handleEvents(e: PixelMessage) {
-  switch (e.data.eventName) {
-    case 'vtex:pageInfo': {
-      switch (e.data.eventType) {
 
+  switch (e.data.eventName) {
+    case 'vtex:pageInfo':
+      console.log('evento', e.data.eventType);
+      switch (e.data.eventType) {
+        case 'homeView':
+          console.log('homeView');
+          break;
         case 'categoryView':
           window._etmc.push(["setOrgId", "100023394"]);
           window._etmc.push(["trackPageView", { "category": e.data.category?.name }]);
@@ -25,20 +29,30 @@ export function handleEvents(e: PixelMessage) {
         }
       }
       break;
-    }
-
     case 'vtex:productView': {
+
+      window.sc = window.dataLayer.filter(el => {
+        return (el.dimension12);
+      })
+
       const { product } = e.data
       window._etmc.push(["setOrgId", "100023394"]);
       window._etmc.push(["trackPageView", { item: product.productId }]);
-      console.log('Salesforce Einstein - Visualizado Produto ID: ' + product.selectedSku.itemId + ' Nome: ' + product.productName);
+
+      var price = product.items[0].sellers[0].commertialOffer.ListPrice;
+
+      console.log('Salesforce Einstein - Visualizado Produto ID: ' + product.productId + ' Nome: ' + product.productName, 'Preço', + price);
+
+      fetch(`https://landfy.smartcampaign.com.br/landfy/api/f90e48f7-4845-11ea-979f-0e55972e184b?fields[Visit_ID]=${Date.now() + Math.random().toFixed()}&fields[Email]=${window.email}&fields[Product_Sku]=${product.productId}&fields[Preco]=${price}&fields[SalesChannel]=${window.sc[0].dimension12}&fields[unique]=Visit_ID`)
+        .then(res => res.json())
+        .then(console.log);
       break;
     }
 
     case 'vtex:addToCart':
-      // window.sc = window.dataLayer.filter(el => {
-      //   return (el.dimension12);
-      // })
+      window.sc = window.dataLayer.filter(el => {
+        return (el.dimension12);
+      })
       const { items } = e.data;
       const productsAdded = items.map((item) => {
         return {
@@ -51,7 +65,7 @@ export function handleEvents(e: PixelMessage) {
       window._etmc.push(["setOrgId", "100023394"]);
       window._etmc.push(["trackCart", { "cart": productsAdded }]);
       console.log('Setado', productsAdded);
-      fetch(`https://landfy.smartcampaign.com.br/landfy/api/f90e48f7-4845-11ea-979f-0e55972e184b?fields[Visit_ID]=${Date.now() + Math.random().toFixed()}&fields[Email]=${window.email}&fields[Product_Sku]=${items[0].skuId}&fields[Preco]=${items[0].price / 100}&fields[SalesChannel]=${'oi'}`).then(res => res.json()).then(console.log);
+      fetch(`https://landfy.smartcampaign.com.br/landfy/api/f90e48f7-4845-11ea-979f-0e55972e184b?fields[Visit_ID]=${Date.now() + Math.random().toFixed()}&fields[Email]=${window.email}&fields[Product_Sku]=${items[0].skuId}&fields[Preco]=${items[0].price / 100}&fields[SalesChannel]=${window.sc[0].dimension12}`).then(res => res.json()).then(console.log);
       break;
 
     case 'vtex:userData':
@@ -73,9 +87,9 @@ export function handleEvents(e: PixelMessage) {
       break;
 
     case 'vtex:cartChanged':
-      // window.sc = window.dataLayer.filter(el => {
-      //   return (el.dimension12);
-      // })
+      window.sc = window.dataLayer.filter(el => {
+        return (el.dimension12);
+      })
       var pixel = window.pixelManagerEvents;
       var cartId = pixel.filter((el: any) => {
         return el.event === "cartId"
@@ -99,7 +113,7 @@ export function handleEvents(e: PixelMessage) {
               else return string.split(':').slice(0, 2).join('');
             }).join('');
             console.log(date);
-            var params = `fields[cart_id]=${cartId[0].cartId + date + '0'}&fields[Email]=${window.email}&fields[ordered]=0${items}&unique=cart_id&fields[SalesChannel]=${'oi'}`
+            var params = `fields[cart_id]=${'db23856e7a43dd463788c0277170c006' + date + '0'}&fields[Email]=${window.email}&fields[ordered]=0${items}&unique=cart_id&fields[SalesChannel]=${window.sc[0].dimension12}`
             fetch(`${url}?${params}`)
               .then((resp) => resp.json())
               .then(function (status) {
@@ -121,37 +135,31 @@ export function handleEvents(e: PixelMessage) {
       break;
 
     case 'vtex:orderPlaced':
-      // window.sc = window.dataLayer.filter(el => {
-      //   return (el.dimension12);
-      // })
-      var pixel = window.pixelManagerEvents;
-      var cartId = pixel.filter((el: any) => {
-        return el.event === "cartId"
-      });
-      const { transactionProducts } = e.data;
-      const products = transactionProducts.map((item) => {
+      const itemsAdded = JSON.parse(localStorage.getItem('items') || '{}');
+      const products = itemsAdded.map((item: any) => {
         return [
           {
-            "item": item.sku,
+            "item": item.id,
             "quantity": item.quantity,
-            "price": item.price,
+            "price": item.listPrice,
             "unique_id": item.id
           },
         ];
       });
+      console.log('produtos flateados', products.flat(1));
       window._etmc.push(["setOrgId", "100023394"]);
-      window._etmc.push(["trackConversion", { "cart": products }]);
-      window.cart_id = localStorage.getItem('orderForm');
-      const itemsCarrinho = transactionProducts.slice(-3).reduce((items, item, index) => {
-        return `${items}&fields[product${index + 1}]=${item.id}&fields[preco${index + 1}=${item.price}]`
+      window._etmc.push(["trackConversion", { "cart": products.flat(1) }]);
+      window.cart_id = localStorage.getItem('carrinhoAbandonado');
+      const itemsCarrinho = itemsAdded.slice(-3).reduce((items: any, item: any, index: any) => {
+        return `${items}&fields[product${index + 1}]=${item.id}&fields[preco${index + 1}=${item.listPrice}]`
       }, '');
       const url = '//landfy.smartcampaign.com.br/landfy/api/5c694cf4-1ac3-11ea-8061-0ebf47f38cdc';
-      var params = `fields[cart_id]=${cartId[0].cartId + '1'}&fields[Email]=${window.email}.com&fields[ordered]=1${itemsCarrinho}&unique=cart_id&fields[SalesChannel]=${'oi'}`;
+      var params = `fields[cart_id]=${'db23856e7a43dd463788c0277170c006' + Date.now() + '1'}&fields[Email]=${window.email}.com&fields[ordered]=1${itemsCarrinho}&unique=cart_id&fields[SalesChannel]=${localStorage.getItem('pricetablestate')}`;
       fetch(`${url}?${params}`)
         .then(resp => resp.json())
         .then(resp => {
           localStorage.remove('orderForm');
-          localStorage.remove('cart_id');
+          localStorage.remove('cartId');
           localStorage.remove('carrinhoAbandonado');
           console.log(resp)
         });
@@ -162,7 +170,6 @@ export function handleEvents(e: PixelMessage) {
     }
   }
 }
-
 
 if (canUseDOM) {
   window.addEventListener('message', handleEvents)

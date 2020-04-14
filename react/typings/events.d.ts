@@ -26,6 +26,7 @@ export interface PageInfoData extends EventData {
   accountName: string
   pageTitle: string
   pageUrl: string
+  pageCategory: string
 }
 
 export interface HomePageInfo extends PageInfoData {
