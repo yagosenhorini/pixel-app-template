@@ -1,17 +1,22 @@
 export interface PixelMessage extends MessageEvent {
   data:
-  | ProductViewData
-  | ProductClickData
-  | OrderPlacedData
-  | PageViewData
-  | ProductImpressionData
-  | AddToCartData
-  | RemoveToCartData
-  | CartChangedData
-  | HomePageInfo
-  | ProductPageInfoData
-  | SearchPageInfoData
-  | UserData
+    | ProductViewData
+    | ProductClickData
+    | OrderPlacedData
+    | OrderPlacedTrackedData
+    | PageViewData
+    | ProductImpressionData
+    | AddToCartData
+    | RemoveToCartData
+    | CartChangedData
+    | HomePageInfo
+    | ProductPageInfoData
+    | SearchPageInfoData
+    | UserData
+    | CartIdData
+    | PromoViewData
+    | PromotionClickData
+    | NewsletterSubscriptionData
 }
 
 export interface EventData {
@@ -26,7 +31,24 @@ export interface PageInfoData extends EventData {
   accountName: string
   pageTitle: string
   pageUrl: string
-  pageCategory: string
+}
+
+export interface UserData extends PageInfoData {
+  eventType: 'userData'
+  eventName: 'vtex:userData'
+  firstName?: string
+  lastName?: string
+  document?: string
+  id?: string
+  email?: string
+  phone?: string
+  isAuthenticated: boolean
+}
+
+export interface CartIdData extends PageInfoData {
+  eventType: 'cartId'
+  eventName: 'vtex:cartId'
+  cartId: string
 }
 
 export interface HomePageInfo extends PageInfoData {
@@ -34,15 +56,15 @@ export interface HomePageInfo extends PageInfoData {
 }
 
 export interface ProductPageInfoData extends PageInfoData {
-  eventType: 'productView'
+  eventType: 'productPageInfo'
 }
 
 export interface SearchPageInfoData extends PageInfoData {
   eventType:
-  | 'internalSiteSearchView'
-  | 'categoryView'
-  | 'departmentView'
-  | 'emptySearchView'
+    | 'internalSiteSearchView'
+    | 'categoryView'
+    | 'departmentView'
+    | 'emptySearchView'
   category?: CategoryMetaData
   department?: DepartmentMetaData
   search?: SearchMetaData
@@ -84,40 +106,33 @@ export interface RemoveToCartData extends EventData {
   items: CartItem[]
 }
 
+export interface CartChangedData extends EventData {
+  event: 'cartChanged'
+  eventName: 'vtex:cartChanged'
+  items: CartItem[]
+}
+
 export interface OrderPlacedData extends Order, EventData {
   event: 'orderPlaced'
   eventName: 'vtex:orderPlaced'
 }
 
-export interface CartChangedData extends EventData {
-  event: 'cartChanged'
-  eventName: 'vtex:cartChanged'
-  items: CartItem[]
-  id: string
-}
-
-export interface UserData extends PageInfoData {
-  eventType: 'userData'
-  eventName: 'vtex:userData'
-  firstName?: string
-  lastName?: string
-  document?: string
-  id?: string
-  email?: string
-  phone?: string
-  isAuthenticated: boolean
+export interface OrderPlacedTrackedData extends Order, EventData {
+  event: 'orderPlacedTracked'
+  eventName: 'vtex:orderPlacedTracked'
 }
 
 export interface ProductViewData extends EventData {
   event: 'productView'
   eventName: 'vtex:productView'
-  product: ProductDetail
+  product: Product
 }
 
 export interface ProductClickData extends EventData {
   event: 'productClick'
   eventName: 'vtex:productClick'
   product: ProductSummary
+  list?: string
 }
 
 export interface ProductImpressionData extends EventData {
@@ -129,94 +144,80 @@ export interface ProductImpressionData extends EventData {
   list: string
 }
 
-interface CartItem {
-  skuId: string
-  variant: string
-  price: number
-  name: string
-  quantity: number
-  productRefId: string
-  brand: string
-  category: string
-}
-
-interface OrderFormContext {
+export interface CartData extends EventData {
+  event: 'cart'
+  eventName: 'vtex:cart'
   orderForm: OrderForm
-  loading: boolean
 }
 
-interface OrderFormItem {
-  additionalInfo: ItemAdditionalInfo
-  availability: string
+export interface PromoViewData extends EventData {
+  event: 'promoView'
+  eventName: 'vtex:promoView'
+  promotions: Promotion[]
+}
+
+export interface PromotionClickData extends EventData {
+  event: 'promotionClick'
+  eventName: 'vtex:promotionClick'
+  promotions: Promotion[]
+}
+
+export interface NewsletterSubscriptionData extends EventData {
+  event: 'newsletterSubscription'
+  eventName: 'vtex:newsletterSubscription'
+  name: string
+  email: string
+  phone: string
+}
+
+interface Promotion {
+  id?: string
+  name?: string
+  creative?: string
+  position?: string
+}
+
+interface CartItem {
+  brand: string
+  ean: string
+  category: string
   detailUrl: string
-  id: string
   imageUrl: string
-  listPrice: number
-  measurementUnit: string
   name: string
   price: number
   productId: string
-  quantity: number
-  sellingPrice: number
-  skuName: string
-  skuSpecifications: SKUSpecification[]
-  uniqueId: string
-  productCategories: Record<string, string>
-  productCategoryIds: string
   productRefId: string
+  quantity: number
+  seller: string
+  sellerName: string
+  skuId: string
+  variant: string
 }
 
-interface ItemAdditionalInfo {
-  brandName: string
-}
-
-interface SKUSpecification {
-  fieldName: string
-  fieldValues: string[]
-}
-
-interface OrderForm {
+export interface OrderForm {
   id: string
-  items: OrderFormItem[]
-  marketingData: MarketingData
-  totalizers: Totalizer[]
-  value: number
-  messages: OrderFormMessages
-}
-
-interface MarketingData {
-  coupon: string
-}
-
-interface Totalizer {
-  id: string
-  name: string
-  value: number
-}
-
-interface OrderFormMessages {
-  couponMessages: Message[]
-  generalMessages: Message[]
-}
-
-interface Message {
-  code: string
-  status: string
-  text: string
+  items: CartItem[]
 }
 
 export interface Order {
-  orderId: string
-  currency: string
   accountName: string
+  corporateName: string
+  coupon: string
+  currency: string
+  openTextField: string
   orderGroup: string
   salesChannel: string
-  coupon: string
-  visitorType: string
-  visitorContactInfo: string[]
-  visitorAddressState: string
+  visitorAddressCity: string
+  visitorAddressComplement: string
   visitorAddressCountry: string
+  visitorAddressNeighborhood: string
+  visitorAddressNumber: string
   visitorAddressPostalCode: string
+  visitorAddressState: string
+  visitorAddressStreet: string
+  visitorContactInfo: string[]
+  visitorContactPhone: string
+  visitorType: string
   transactionId: string
   transactionDate: string
   transactionAffiliation: string
@@ -228,6 +229,7 @@ export interface Order {
   transactionCurrency: string
   transactionPaymentType: PaymentType[]
   transactionShippingMethod: ShippingMethod[]
+  transactionLatestShippingEstimate: Date
   transactionProducts: ProductOrder[]
   transactionPayment: {
     id: string
@@ -274,6 +276,7 @@ export interface ProductOrder {
   sellingPrice: number
   tax: number
   quantity: number
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   components: any[]
   measurementUnit: string
   unitMultiplier: number
@@ -285,39 +288,56 @@ export interface PriceTag {
   value: number
 }
 
-interface Product {
+export interface Product {
   brand: string
   brandId: string
   categories: string[]
+  categoryId: string
+  // eslint-disable-next-line @typescript-eslint/array-type
+  categoryTree: Array<{ id: string; name: string }>
+  detailUrl: string
+  items: Item[]
+  linkText: string
   productId: string
   productName: string
   productReference: string
-  linkText: string
-  items: Item[]
-}
-
-export interface ProductSummary extends Product {
-  sku: Item
-}
-
-export interface ProductDetail extends Product {
-  categoryId: string
-  categoryTree: { id: string; name: string }[]
   selectedSku: Item
 }
 
 export interface Item {
   itemId: string
   name: string
-  ean?: string // TODO: provide this info at productImpression
+  ean: string
   referenceId: { Key: string; Value: string }
-  seller?: Seller
+  imageUrl: string
+  sellers: Seller[]
+}
+
+export interface ProductSummary {
+  brand: string
+  brandId: string
+  categories: string[]
+  items: ItemSummary[]
+  linkText: string
+  productId: string
+  productName: string
+  productReference: string
+  sku: ItemSummary
+}
+
+interface ItemSummary {
+  itemId: string
+  ean: string
+  name: string
+  referenceId: { Key: string; Value: string }
+  seller: Seller
   sellers: Seller[]
 }
 
 export interface Seller {
   commertialOffer: CommertialOffer
   sellerId: string
+  sellerName: string
 }
 
 export interface CommertialOffer {
